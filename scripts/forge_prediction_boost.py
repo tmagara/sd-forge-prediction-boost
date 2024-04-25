@@ -40,6 +40,5 @@ class PredictionBoostForForge(modules.scripts.Script):
         p.sd_model.forge_objects.unet = model
 
         p.extra_generation_params.update(dict(
-            predictionboost_enabled=enabled,
-            predictionboost_scale=boost_scale,
+            predictionboost=boost_scale,
         ))
