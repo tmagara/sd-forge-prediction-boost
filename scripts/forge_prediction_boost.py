@@ -26,8 +26,8 @@ class PredictionBoostForForge(modules.scripts.Script):
 
     def ui(self, *args, **kwargs):
         with modules.ui_components.InputAccordion(False, label=self.title()) as enabled:
-            do_normalize = gradio.Checkbox(label="Normalize", value=True)
-            boost_scale = gradio.Slider(label='Boost Scale', minimum=0.0, maximum=1.0, step=0.01, value=0.10)
+            do_normalize = gradio.Checkbox(label="Normalize", value=True, visible=False)
+            boost_scale = gradio.Slider(label='Boost Scale', minimum=0.0, maximum=1.0, step=0.01, value=0.15)
         return enabled, do_normalize, boost_scale
 
     def process_before_every_sampling(self, p, *script_args, **kwargs):
@@ -42,10 +42,11 @@ class PredictionBoostForForge(modules.scripts.Script):
             denoised = args["denoised"]
             cond_denoised = args["cond_denoised"]
 
+            noise_pred = (input - denoised) / sigma
             noise_pred_cond = (input - cond_denoised) / sigma
             boost_denoised = _rejection(input, noise_pred_cond)
             if do_normalize:
-                boost_denoised = _normalize(boost_denoised, noise_pred_cond) * sigma
+                boost_denoised = _normalize(boost_denoised, noise_pred) * sigma
             return denoised + boost_scale * boost_denoised
 
         model = p.sd_model.forge_objects.unet.clone()
